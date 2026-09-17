@@ -45,6 +45,7 @@ $$
 - `DataSet/HUP_iEEG/`：HUP iEEG 数据。
 - `Paper/`：上一篇 sparse cMLP 研究论文。
 - `Result/`：实验输出目录。
+- `Code/`：模型代码目录。
 
 ## 当前状态
 
