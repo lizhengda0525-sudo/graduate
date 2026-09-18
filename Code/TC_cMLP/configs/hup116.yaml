@@ -1,0 +1,32 @@
+seed: 42
+
+data:
+  dataset_root: ../../../DataSet/HUP_iEEG
+  subject: HUP116
+  run: 1
+  seconds_before_onset: 80.0
+  seconds_after_onset: 80.0
+  lowpass_hz: 80.0
+  notch_hz: 60.0
+  target_sampling_rate: 200.0
+  window_seconds: 5.0
+  step_seconds: 1.0
+  lag: 5
+
+model:
+  hidden_dim: 8
+
+training:
+  epochs: 150
+  learning_rate: 0.005
+  lambda_group: 0.001
+  lambda_temporal: 0.01
+  lambda_weight: 0.0001
+  seed: 42
+  log_every: 25
+  device: cpu
+  sample_batch_size: 256
+
+method: tc
+soz_top_fraction: 0.18
+output_dir: ../results/hup116

@@ -1,0 +1,31 @@
+seed: 7
+
+data:
+  num_series: 5
+  num_windows: 4
+  points_per_window: 30
+  lag: 2
+  noise_std: 0.1
+  change_window: 2
+
+model:
+  hidden_dim: 4
+
+training:
+  epochs: 2
+  learning_rate: 0.01
+  lambda_group: 0.001
+  lambda_temporal: 0.01
+  lambda_weight: 0.0001
+  seed: 7
+  log_every: 1
+  device: cpu
+  sample_batch_size: 16
+
+methods:
+  - independent
+  - tc_no_temporal
+  - tc
+
+output_dir: ../results/smoke
+

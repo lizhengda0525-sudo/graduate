@@ -1,0 +1,30 @@
+seed: 42
+
+data:
+  num_series: 10
+  num_windows: 20
+  points_per_window: 500
+  lag: 2
+  noise_std: 0.15
+  change_window: 10
+
+model:
+  hidden_dim: 16
+
+training:
+  epochs: 300
+  learning_rate: 0.01
+  lambda_group: 0.001
+  lambda_temporal: 0.01
+  lambda_weight: 0.0001
+  seed: 42
+  log_every: 25
+  device: cpu
+  sample_batch_size: 256
+
+methods:
+  - independent
+  - tc_no_temporal
+  - tc
+
+output_dir: ../results/synthetic
