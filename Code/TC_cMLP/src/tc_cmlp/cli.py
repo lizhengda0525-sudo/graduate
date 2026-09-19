@@ -1,31 +1,23 @@
 import argparse
-import json
-from collections.abc import Sequence
+from pathlib import Path
+
+from tc_cmlp.experiment import preprocess_hup, run_hup, run_synthetic
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="tc-cmlp")
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    synthetic_parser = subparsers.add_parser("synthetic")
-    synthetic_parser.add_argument("--config", required=True)
-
-    hup_parser = subparsers.add_parser("hup")
-    hup_parser.add_argument("--config", required=True)
-    return parser
-
-
-def main(argv: Sequence[str] | None = None) -> None:
-    arguments = build_parser().parse_args(argv)
-    if arguments.command == "synthetic":
-        from tc_cmlp.pipelines.synthetic import run_synthetic_experiment
-
-        result = run_synthetic_experiment(arguments.config)
-    else:
-        from tc_cmlp.pipelines.hup import run_hup_experiment
-
-        result = run_hup_experiment(arguments.config)
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Original cMLP and TC-cMLP experiments")
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name in ("synthetic", "preprocess-hup", "hup"):
+        command = commands.add_parser(name)
+        command.add_argument("--config", type=Path, required=True)
+    args = parser.parse_args()
+    if args.command == "synthetic":
+        run_synthetic(args.config)
+    elif args.command == "preprocess-hup":
+        path = preprocess_hup(args.config)
+        print(f"预处理完成：{path}")
+    elif args.command == "hup":
+        run_hup(args.config)
 
 
 if __name__ == "__main__":

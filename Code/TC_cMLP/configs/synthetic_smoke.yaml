@@ -1,24 +1,24 @@
 seed: 42
 
 data:
-  num_series: 10
-  num_windows: 20
-  points_per_window: 500
+  num_series: 5
+  num_windows: 4
+  points_per_window: 100
   lag: 2
   noise_std: 0.15
-  change_window: 10
+  change_window: 2
 
 model:
-  hidden: [16]
+  hidden: [8]
   activation: relu
 
 training:
-  max_iter: 2000
+  max_iter: 100
   learning_rate: 0.05
   lambda_group: 0.008
   lambda_ridge: 0.001
   lambda_temporal: 0.01
-  check_every: 100
+  check_every: 20
   lookback: 5
   seed: 42
   device: cpu
@@ -29,4 +29,4 @@ methods:
   - tc_no_temporal
   - tc
 
-output_dir: results/synthetic/seed_42
+output_dir: results/synthetic/smoke_seed_42

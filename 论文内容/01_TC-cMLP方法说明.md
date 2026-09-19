@@ -87,7 +87,7 @@ $$
 X^{(1)},X^{(2)},\ldots,X^{(W)}.
 $$
 
-独立滑动窗口 cMLP 会在每个窗口中单独训练一个模型。短窗口提供的样本数量有限，相邻窗口得到的因果矩阵容易受到信号噪声、参数初始化和训练波动影响。网络在生理状态接近时也可能表现出明显差异，进而影响变化点分析和 SOZ 排名。
+原始 cMLP 用于滑动窗口时，会在每个窗口中单独训练一个模型。短窗口提供的样本数量有限，相邻窗口得到的因果矩阵容易受到信号噪声、参数初始化和训练波动影响。网络在生理状态接近时也可能表现出明显差异，进而影响变化点分析和 SOZ 排名。
 
 ## 6. TC-cMLP 的参数组织方式
 
@@ -269,7 +269,7 @@ Synthetic data 提供已知动态因果结构，用于验证 edge detection、ca
 
 HUP iEEG 提供临床 SOZ channel、resection or ablation channel 和手术结局信息。该部分利用患者级 precision、sensitivity、F1、AUROC 和 AUPRC 检验 channel 排名及定位能力，并通过 patient-level bootstrap 计算 confidence interval。
 
-基线方法包括 sliding-window sparse VAR、independent cMLP、fully shared cMLP，以及保留时变第一层但去除 temporal regularization 的模型。消融研究分别去除 group sparsity、temporal regularization 和后续层共享，用于确定各组成部分对动态网络恢复和 SOZ 定位的作用。
+基线方法包括 sliding-window sparse VAR、原始 cMLP 逐窗口训练、fully shared cMLP，以及保留时变第一层但去除 temporal regularization 的模型。消融研究分别去除 group sparsity、temporal regularization 和后续层共享，用于确定各组成部分对动态网络恢复和 SOZ 定位的作用。
 
 ## 14. 研究边界
 
@@ -279,4 +279,4 @@ TC-cMLP 学到的是预测意义上的 Granger causal influence，无法单独�
 
 ## 15. 参考基础
 
-基础 sparse cMLP 方法及其 iEEG 应用参考 `Paper/A_Nonlinear_Granger_Causality_Learning_Approach_via_Sparse_Component-Wise_MLP_for_iEEG-Based_Epileptogenic_Zone_Localization.pdf`。现有 `Code/Neural-GC-master/Neural-GC-master/` 提供 cMLP、group sparsity 和 ISTA 训练代码，可用于核对基础模型行为。TC-cMLP 按照本文定义重新组织窗口专属第一层、共享后续层、时间约束和动态因果矩阵输出。
+原始 cMLP 代码保存在 `Code/Neural-GC-original/`。第一篇会议论文的方法称为 S-cMLP，其 iEEG 应用参考 `Paper/A_Nonlinear_Granger_Causality_Learning_Approach_via_Sparse_Component-Wise_MLP_for_iEEG-Based_Epileptogenic_Zone_Localization.pdf`。当前方法称为 TC-cMLP，工程代码保存在 `Code/TC_cMLP/`，使用原始 cMLP 预测网络并加入窗口专属第一层、共享后续层和时间约束。

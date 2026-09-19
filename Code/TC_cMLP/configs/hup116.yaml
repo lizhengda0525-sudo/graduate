@@ -1,32 +1,40 @@
-seed: 42
-
 data:
-  dataset_root: ../../../DataSet/HUP_iEEG
+  dataset_root: ../../DataSet/HUP_iEEG
+  signal_segment_path: results/hup/cache/HUP116_run1_segment.npz
   subject: HUP116
   run: 1
   seconds_before_onset: 80.0
   seconds_after_onset: 80.0
   lowpass_hz: 80.0
+  lowpass_order: 4
   notch_hz: 60.0
+  notch_quality_factor: 30.0
   target_sampling_rate: 200.0
   window_seconds: 5.0
   step_seconds: 1.0
   lag: 5
 
 model:
-  hidden_dim: 8
+  hidden: [8]
+  activation: relu
 
 training:
-  epochs: 150
+  max_iter: 2000
   learning_rate: 0.005
   lambda_group: 0.001
+  lambda_ridge: 0.0001
   lambda_temporal: 0.01
-  lambda_weight: 0.0001
+  check_every: 100
+  lookback: 5
   seed: 42
-  log_every: 25
   device: cpu
-  sample_batch_size: 256
+  torch_threads: 1
 
-method: tc
+methods:
+  - cmlp
+  - tc_no_temporal
+  - tc
+
 soz_top_fraction: 0.18
-output_dir: ../results/hup116
+preprocessed_path: results/hup/preprocessed/HUP116_run1_windows.npz
+output_dir: results/hup/HUP116_run1
