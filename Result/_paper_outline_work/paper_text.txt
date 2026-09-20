@@ -1,0 +1,602 @@
+===== PAGE 1 =====
+ 
+ 
+A Nonlinear Granger Causality Learning Approach 
+via Sparse Component-Wise MLP for iEEG-based 
+Epileptogenic Zone Localization 
+ 
+Zhengda Li 
+Department of Automation 
+Xiamen University 
+Xiamen, China 
+lizhengda@stu.xmu.edu.cn 
+Sun Zhou* 
+1 Department of Automation 
+Xiamen University 
+2 Xiamen Society of Systems Engineering 
+Xiamen, China 
+zhousun@xmu.edu.cn 
+Abstract—Preoperative localization of the epileptogenic zone 
+(EZ) is crucial for patients with drug -resistant epilepsy who 
+require surgical removal of the EZ. In this paper, we propose a 
+nonlinear Granger causality learning approach via sparse 
+component-wise multil ayer perceptron (cMLP) for EZ 
+localization. The model takes the historical signals of each 
+intracranial electroencephalography (iEEG) channel as input to 
+learn the nonlinear causal interactions among channels. 
+Component-wise structure separates the influence of each input 
+channel on every output channel, and applying sparsity 
+regularization to the weights of each sub -model allows the 
+identification of significant effective connectivity. By computing 
+the local features of the effective connectivity,  we can analyze 
+the possibility of epilepsy in different brain regions and 
+determine the EZ. The proposed approach is evaluated on the 
+iEEG data collected at the Hospital of the University of 
+Pennsylvania (HUP). The results indicate that this approach can 
+accurately identify EZ which is consistent with the clinical 
+annotations. The precision, sensitivity, and F1 Score are 88.9%, 
+100%, and 0.941, respectively.  
+Keywords—Intracranial EEG , formatting, sparsity 
+regularization, effective connectivity , epileptogenic zone 
+localization, component-wise MLP  
+I. INTRODUCTION  
+Epilepsy is a common and serious chronic neuropathic 
+condition, affecting approximately 6 0 million individuals 
+globally [1]. Its onset is caused by abnormal discharges in 
+specific brain regions, which then spread to other normal brain 
+areas and impair their function [2]. Medication is the primary 
+treatment for epilepsy, but about 30 –40% of patients do not 
+respond to drugs. Such patients need surgical resection of the 
+EZ, but the efficacy depends on the accurate localization of 
+the EZ before surgery [3]. At present, localization of 
+epileptogenic zone mainly relies on clinicians' subjective 
+analysis of iEEG, which is very time-consuming and prone to 
+human mistake. The non-linear and non-stationary features of 
+EEG signals and the possibility of EEG activity similar to the 
+abnormal discharge form of epileptogenic zone in normal 
+brain areas further increase the difficulty of localization. 
+iEEG provides EEG signals with high spatial resolution 
+and high signal -to-noise ratio, which can more accurately 
+reflect abnormal discharge activity of the brain, thus becoming 
+an important method for preoperative localization of epileptic 
+foci [4]. The ex isting methods for epileptogenic zone 
+localization mainly include channel -wise analysis and 
+network-based analysis. Channel -based analysis methods 
+(such as high -frequency oscillation HFOs) can effectively 
+capture abnormal activity in local brain regions an d provide 
+reliable information for lesion identification [5]. The method 
+based on brain network analysis reveals the propagation 
+mechanism of epileptogenic activity at the system level by 
+characterizing the connectivity of different brain regions.  
+According to the nature of connection relationships, brain 
+network analysis can be further divided into structural 
+connectivity networks, functional connectivity networks, and 
+effective connectivity networks  [6]. Specifically, functional 
+connectivity networks refer to the statistical relationships of 
+specific physiological signals over time, using the synchrony 
+between brain structures to reflect the communication 
+between regions  [7]. Effective connectivity network 
+observation and analyzing the working principles and 
+information transmission mechanisms of the brain can reflect 
+the causal effects between brain regions and has greater 
+potential in EZ localization [8]. Previous studies have used 
+linear Granger causalit y models or frequency -domain 
+methods to construct effective connectivity networks  [9]. In 
+the field of deep learning, there has also been corresponding 
+research on model interpretability [10] or on adding neural 
+perturbations to established brain models to construct 
+effective connectivity networks [11]. These methods have 
+made significant pr ogress in revealing information 
+transmission between brain regions and the mechanisms of 
+epileptic seizures. 
+This paper presents a nonlinear Granger causality learning 
+approach via sparse cMLP for accurate localization of the EZ 
+among patients with drug -resistant epilepsy.  The proposed 
+approach con structs effective brain connectivity networks 
+from iEEG signals and subsequently localizes the EZ based 
+on the local features of these networks. Specifically, we utilize 
+the cMLP framework for nonlinear causal modeling to learn 
+nonlinear causal relationships between brain regions from 
+multi-channel iEEG recordings.  The component-wise 
+architecture explicitly disentangles the individual 
+contributions of each input channel to each output channel. By 
+imposing sparsity constraints on specific weights within each 
+sub-module of the cMLP, the model automatically selects key 
+causal connections. This process yields a time -varying 
+effective connectivity network that reflects the brain's 
+dynamic causal interactions.  The epileptogenicity of each 
+brain region is assessed by evaluating the local features of the 
+connectivity networks, enabling the automated identification 
+of the seizure focus. This approach balances nonlinear 
+modeling capability with interpretability of causal 
+relationships, providing a quantifiable basis for revealing the 
+2025 International Conference on Electrical, Communication, and Computing Technologies (iCONECCT) | 979-8-3315-7415-4/25/$31.00 ©2025 IEEE | DOI: 10.1109/ICONECCT67014.2025.11470075
+Authorized licensed use limited to: Xiamen University. Downloaded on April 30,2026 at 02:09:53 UTC from IEEE Xplore.  Restrictions apply. 
+===== PAGE 2 =====
+ 
+ 
+characteristics of abnormal discharges originating from the 
+EZ. 
+The remainder of the paper is structured as follows. 
+Section 2 presents the methodology used in this approach. In 
+Section 3, we present the application of our approach in 
+localizing EZ in iEEG and discuss the results. Finally,  
+conclusion and future directions are given in Section 4. 
+II. METHOD 
+The overall framework of the proposed approach is shown 
+in Fig. 1, encompassing key steps such as nonlinear Granger 
+causality modeling, sparsity -constrained optimization, 
+dynamic effective connectivity network construction and EZ 
+localization. In the left panel of Fig. 1, a cMLP is employed as 
+a nonlinear Granger causality model , where independent 
+modeling networks capture the dependencies of each output 
+variable separately. The middle panel of Fig . 1 demonstrates 
+that, based on the model prediction error, group loss is applied 
+to specific layer weights to introduce sparsity constraints, and 
+by aggregating the weights, the causal influence of each input 
+channel on the current output channel can be obtained. In the 
+right panel of Fig. 1, the causal relationships from all models 
+are combined to construct an effective connectivity ne twork 
+among brain regions. The sliding-window method is used to 
+capture its dynamic evolution, and the information flow 
+between iEEG channels is computed for each time window to 
+characterize the network dynamics of the channels, enabling 
+channels with sustained abnormal activity to be identified as 
+the epileptogenic zone.
+ 
+Fig. 1. Overall framework of the proposed method.
+A. Modeling Multichannel Nonlinear Effective Connectivity 
+in the Brain 
+To characterize information transfer among brain regions, 
+this study constructs a multichannel effective connectivity 
+network based on nonlinear Granger causality (GC) analysis 
+using a cMLP model. 
+1) Effective Connectivity Modeling Based on Nonlinear 
+Granger Causality 
+The effective connectivity among multichannel brain 
+signals can be characterized using the GC model. Under the 
+linear assumption, GC is typically modeled via a vector 
+autoregressive (VAR) model [12]. Let 𝑥𝑡 ∈ ℝ𝑝 denote a 𝑝-
+dimensional stationary time series at time 𝑡. The VAR model 
+assumes that 𝑥𝑡 is a linear combination of its past 𝐾 lagged 
+vectors: 
+ 𝑥𝑡 = ∑ 𝛷𝑘𝐾
+𝑘=1 𝑥𝑡−𝑘 + 𝜀𝑡 () 
+where Φ𝑘 is a 𝑝 × 𝑝 coefficient matrix and 𝜀𝑡 is zero -mean 
+white noise. If Φ𝑖,𝑗
+𝑘 = 0 for all lags 𝑘 , channel 𝑗 is not 
+considered to have a Granger causal effect on channel 𝑖. 
+However, EEG signals exhibit strong nonlinearity and 
+non-stationarity, especially during seizures, making the linear 
+model insufficient to capture complex dynamic interactions 
+between channels. Therefore, a nonlinear Granger causality 
+model is introduced, which assumes that the time series at time 
+𝑡 is a nonlinear function of historical channel information: 
+ 𝑥𝑡 = 𝑔(𝑥<𝑡1, ⋯ , 𝑥<𝑡𝑝) + 𝜀𝑡 () 
+where 𝑥<𝑡𝑖 = (… , 𝑥𝑡−2,𝑖, 𝑥𝑡−1,𝑖)  represents the history of 
+channel 𝑖 , 𝜀𝑡 is zero -mean white noise , and the function 
+𝑔(⋅)captures the nonlinear influence of past values on the 
+current value. 
+To determine whether channel 𝑗 is a Granger causal source 
+for channel 𝑖, we model each output channel 𝑖 separately: 
+ 𝑥𝑡𝑖 = 𝑔𝑖(𝑥<𝑡1, ⋯ , 𝑥<𝑡𝑝) + 𝜀𝑡𝑖 () 
+If the function 𝑔𝑖(⋅)  is insensitive to the input from 
+channel 𝑗, then channel 𝑗 is not considered a Granger cause 
+of channel 𝑖, that is when  𝑥<𝑡𝑗 ≠ 𝑥,
+<𝑡𝑗: 
+ 𝑔𝑖(𝑥<𝑡1, ⋯ , 𝑥<𝑡𝑗, ⋯ , 𝑥<𝑡𝑝) = 𝑔𝑖(𝑥<𝑡1, ⋯ , 𝑥,
+<𝑡𝑗, ⋯ , 𝑥<𝑡𝑝)() 
+2) Nonlinear Granger Causality Modeling Using cMLP 
+To capture the information transfer among brain regions in 
+a nonlinear manner, we adopt a cMLP structure. The cMLP 
+constructs a separate nonlinear prediction model for each 
+output channel 𝑖 , taking the historical sequences of all 
+channels as input to predict the current value of the channel, 
+thereby learning nonlinear causal relationships between 
+channels. 
+At time 𝑡, the hidden layer vector of the first layer is 
+computed as: 
+ ℎ𝑡
+1 = 𝜎(∑ 𝑊1𝐾
+𝑘=1 𝑥𝑡−𝑘 + 𝑏1) () 
+where 𝑊1and 𝑏1 are the weight matrix and bias of the first 
+layer, The symbol  𝜎(⋅)  represents a nonlinear activation 
+Authorized licensed use limited to: Xiamen University. Downloaded on April 30,2026 at 02:09:53 UTC from IEEE Xplore.  Restrictions apply. 
+===== PAGE 3 =====
+ 
+ 
+function. The hidden layer at layer 𝑙 is recursively computed 
+as: 
+ ℎ𝑡
+𝑙 = 𝜎(𝑊𝑙ℎ𝑡
+𝑙−1 + 𝑏𝑙) () 
+The output layer is given by: 
+ 𝑥𝑡𝑖 = 𝑔𝑖(𝑥<𝑡1, ⋯ , 𝑥<𝑡𝑝) + 𝜀𝑡𝑖 = 𝑊𝐿ℎ𝑡
+𝐿−1 + 𝑏𝐿 + 𝜀𝑡𝑖 () 
+where 𝑊𝐿and 𝑏𝐿are the parameters of the output layer, and 
+𝜀𝑡,𝑖is assumed as a white noise with zero mean. 
+B. Sparsity-Inducing Penalty on Network Weights 
+The black-box nature of neural networks makes it difficult 
+to directly extract causal relationships. To enhance model 
+interpretability, a sparsity -inducing penalty on weights is 
+introduced to shrink the model coefficients, resulting in a 
+sparse representation where some weights are exactly zero. 
+This mechanism enables the selection of channel -relevant 
+information and facilitates causal interpretation of the learned 
+parameters. 
+In (6), if all elements in the 𝑗-th column of the first -layer 
+weight matrix 𝑊1  for function 𝑔𝑖  are zero, denoted as  
+𝑊(:,𝑗)
+1 = 0, then the input channel 𝑥𝑡𝑗 does not affect either the 
+hidden representation ℎ𝑡
+1 or the output 𝑥𝑡𝑖, which corresponds 
+to the situation described in (5), implying that the function 
+𝑔𝑖(⋅) is independent of 𝑥𝑡𝑗. Consequently, channel 𝑗 is not a 
+Granger cause of channel 𝑖 [10]. 
+Therefore, by applying a sparsity -inducing regularization 
+on 𝑊1, the model is encouraged to drive irrelevant column 
+weights toward zero, effectively identifying Granger causal 
+relationships between channels. The overall optimization 
+problem can be formulated as: 
+ 𝑚𝑖𝑛
+𝑊
+∑ (𝑥𝑡𝑖 − 𝑔𝑖(𝑥(𝑡−1):(𝑡−𝐾)))
+2
++ 𝜆 ∑ 𝛺(𝑊:𝑗
+1)𝑝
+𝑗=1
+𝑇
+𝑡=𝐾 () 
+where Ω(⋅) is a penalty function that enforces sparsity by 
+shrinking the magnitude of the j-th column of 𝑊1. In this 
+study, a group lasso penalty [13] is used as Ω(⋅) , which 
+performs shrinkage on the weights of the model's input 
+channels, thereby automatically suppressing irrelevant 
+channels and enhancing the model's causal interpretability: 
+ 𝛺(𝑊:𝑗
+1) = ‖𝑊:𝑗
+1‖𝐹 () 
+where ∥⋅∥𝐹  denotes the Frobenius norm. This penalty will 
+uniformly shrink all weights related to input series j. As a 
+result, many columns of 𝑊1 become entirely zero, leaving 
+only those channels that contribute significantly to the model 
+output. Consequently, this regularization mechanism 
+preserves only the most reliable Granger causal relationships 
+among EEG channels. 
+C. Epileptogenic Zone Localization Using Effective 
+Connectivity Network Features 
+The causal relationships between EEG channels 𝑖 and 𝑗 
+are characterized through the sparse coefficients obtained 
+from the nonlinear Granger causality model. These 
+coefficients represent the directed information flow between 
+channels and can be used for epileptogenic zone localization. 
+Due to abnormal discharges in epileptic brain regions, the 
+effective connectivity between EEG channels changes 
+continuously over time. To capture these changes, a sliding 
+window approach is applied to segment the iEEG data, 
+enabling time -resolved analysis of effective connectivity 
+patterns. The information flow between channels is obtained 
+within every sliding window. We can use this information to 
+build effective connectivity networks . Graph -theoretical 
+measures are then applied to this network to localize potential 
+epileptogenic zones. 
+Assuming there are N EEG channels, the connectivity 
+between channels are represented by a matrix  𝐶 = [𝑐𝑖𝑗] ∈
+ℝ𝑁×𝑁 , each 𝑐𝑖𝑗  denotes the directed causal strength from 
+channel j to channel i. For each channel i, the total information 
+outflow is defined as the total of causal influences from i to all 
+other channels, while the total inflow measures the cumulative 
+influence received by channel i from all others. Finally, the net 
+information flow is then defined as the difference between the 
+above two: 
+ 
+𝑜𝑢𝑡𝑓𝑙𝑜𝑤𝑖 = ∑ 𝑐𝑖𝑗
+𝑁
+𝑗=1，𝑗≠𝑖
+𝑖𝑛𝑓𝑙𝑜𝑤𝑖 = ∑ 𝑐𝑗𝑖
+𝑁
+𝑗=1，𝑗≠𝑖  
+𝑛𝑒𝑡𝑓𝑙𝑜𝑤𝑖 = 𝑜𝑢𝑡𝑓𝑙𝑜𝑤𝑖 − 𝑖𝑛𝑓𝑙𝑜𝑤𝑖
+ () 
+With the above description, we can obtain the local 
+features of each brain effective connectivity network. Outflow 
+reflects a channel's ability to act as a driving source and exert 
+causal influence on other brain regions. If the outflow of a 
+channel is consistently high, it may indicate that this region 
+occupies a central position in the epileptic network, actively 
+initiating the abnormal discharge. Inflow represents the extent 
+to which a channel receives input from other b rain regions; 
+The higher inflow ma y indicate that this region is more 
+susceptible to synchronous drive or passive participation in 
+abnormal activity by the epileptic network. Net flows, 
+calculated as the difference between outflows and inflows, can 
+identify regions that act as "net drivers" or "net recipients" in 
+information exchange. Together, these features characterize 
+the dynamic changes of the brain effective connectivity 
+network during seizures. 
+To avoid the interference of occasional fluctuations on the 
+localization of EZ, the continuous -time judgment constraint 
+was introduced. First, sort the information flow indicators of 
+the iEEG channels in each time window, and select the 
+channels in the top K% as suspected EZ channels. Further 
+calculate the longest consecutive duration and the total 
+number of anomalies in each channel within the continuous 
+time window, and take the channels that exceed the set 
+threshold as the predicted EZ channels. 
+III. RESULTS AND DISCUSSION 
+A. Dataset 
+This study utilizes the publicly available OpenNeuro 
+dataset ds004100, originally collected at the Hospital of the 
+University of Pennsylvania (HUP). The dataset comprises de-
+identified iEE G recordings from 58 individuals diagnosed 
+with drug-resistant epilepsy. These recordings were obtained 
+using a combination of subdural electrodes (ECoG) and 
+stereotactically implanted depth electrodes (sEEG) [14]. All 
+enrolled patients subsequently received the assigned surgical 
+intervention, namely resection or laser abl ation. Treatment 
+results were systematically assessed according to the Engel 
+Epilepsy Surgery Outcome Scale. Patients classified as Engel 
+Authorized licensed use limited to: Xiamen University. Downloaded on April 30,2026 at 02:09:53 UTC from IEEE Xplore.  Restrictions apply. 
+===== PAGE 4 =====
+ 
+ 
+Class I are generally free from disabling seizures; 
+consequently, the analysis in this work primarily focuses on 
+data from this specific patient subgroup. 
+The dataset provides detailed spatial coordinates for each 
+electrode contact, along with clinically annotated 
+epileptogenic channels and records of the specific channels 
+that were either surgically resected or thermally ablated. These 
+comprehensive annotations establish a reliable foundation for 
+the localization and analysis of the epileptogenic zone. 
+As an example, subject sub-HUP  116 was implanted with 
+sEEG electrodes at a sampling rate of 500 Hz, comprising 52 
+total channels, among which 50 were usable. The EZ was 
+identified in the RA and RH channels. This patient achieved 
+an Engel Class I postoperative outcome, indicating the 
+absence of disabling seizures. Fig . 2 illustrates a segment of 
+sEEG recordings from the patient’s first seizure episode.  
+During data preprocessing, bad channels were first removed. 
+Subsequently, a low-pass filter was applied to suppress high-
+frequency components above 80 Hz, using a finite impulse 
+response (FIR) filter with a Hann window to reduce ringing 
+artifacts. A notch filter was then applied to suppress power 
+line interference and its second harmonic (60 Hz and 120 Hz), 
+with a bandw idth of ± 2 Hz, also implemented using an FIR 
+filter. 
+ 
+Fig. 2. An exemplary sEEG segment of patient HUP116 during the first 
+seizure. 
+B. Dynamic Evolution of Brain Effective Connectivity 
+Networks 
+Brain effective connectivity networks were constructed 
+using patient sEEG data.  We analyzed the first seizure of 
+patient HUP116 as an example, the sEEG recording had a total 
+duration of 322 seconds, comprising 160,000 data points. The 
+seizure onset occurred at 120 seconds and ended at 261.998 
+seconds. For analysis, a 160 -second segment spanning 80 
+seconds before and after seizure onset (i.e., 40 –200 seconds) 
+was extracted. 
+To characterize the dynamic evolution of brain effective 
+connectivity during this period, the signals were divided into 
+5-second time windows with 80% overlap for sliding-window 
+analysis. Within each window, a nonlinear Granger causality 
+model with sparse coefficient regularization was applied to 
+construct a 50× 50 causal connectivity matrix. Each element in 
+the matrix, located at row i and column j, represents the causal 
+influence of channel i on channel j within the corresponding 
+time window. 
+A total of 156 causal connectivity matrices were obtained 
+from the entire sEEG segment, with each matrix representing 
+the effective connectivity network during a specific time 
+window. Fig . 3 schematically illustrates the network 
+structures derived from different representative time windows, 
+depicting different brain network states before and during ictal. 
+  
+Fig. 3. Brain network states at different stages. The left and right panel 
+correspond to pre-ictal and ictal time windows, respectively. 
+As shown in Fig . 3, the greater the influence of a certain 
+channel on other channels in the network, the stronger its 
+causal correlation with other channel nodes, and the more 
+distinct the heatmap color of its corresponding row. The 
+results indicate that, except for cases w here adjacent region 
+channels have higher connection strength, the connection 
+strength of EZ channels corresponding to RA and RH is 
+significantly higher than that of other channel nodes. 
+The outflow, inflow, and net flow of each channel were 
+calculated for each time window, and the corresponding flow 
+chart was plotted accordingly (see Fig. 4). The horizontal axis 
+represents time, with a coordinate value of 0 representing the 
+moment of seizure onset. The vertical axis represents the flow 
+magnitude of each channel. Each red and blue line 
+corresponds to an epileptogenic channel and a non -
+epileptogenic channel, respectively. The gray shaded area 
+indicates the ictal period. The actually labeled epileptogenic 
+channels showed significantly higher net outflow than other 
+channels after the seizure. 
+ 
+ 
+ 
+Fig. 4. Color-coded flow diagrams of all channels for each time window. 
+The red channels represent clinically labeled EZ channels, the blue 
+channels represent non -epileptogenic channels, and the gray shaded 
+areas indicate the periods of ictal. 
+The dynamic evolution of the brain effective connectivity 
+network is illustrated in Fig . 4. Prior to seizure onset, the 
+outflows and inflow s of the majority of brain region are 
+Authorized licensed use limited to: Xiamen University. Downloaded on April 30,2026 at 02:09:53 UTC from IEEE Xplore.  Restrictions apply. 
+===== PAGE 5 =====
+ 
+ 
+relatively balanced, resulting in net information flow values 
+fluctuating around zero, which reflects a relatively stable state 
+of inter -regional information transfer. In contrast, during 
+seizure activity, the dynamic characteristics of epileptogenic 
+zone channels are markedly distinct from those of normal 
+regions, exhibiting significantly elevated outflow and inflow, 
+as well as larger net flow amplitudes compared to oth er 
+channels. These findings indicate that the epileptogenic zones 
+act as core drivers wi thin the seizure network, providing a 
+reliable indicator for seizure localization. 
+C. Localization of the Epileptogenic Zone 
+Guided by the characteristics of the effective connection 
+network, this study further compared the characteristics of 
+distinct channels in each time window, and chose the 
+candidate channels that were significantly active in the 
+distribution of information flow. If the channels were active in 
+the continuous time window, they could be considered to be 
+in the core position in the epilepsy network and determined as 
+epileptogenic foci, so as to avoid the interference of sporadic 
+fluctuations. Specifically, three indicators of outflow, inflow 
+and net flow were used to analyze each channel, and the top 
+18% nodes were selected as the predicted epileptogenic foci. 
+The predicted results were compared with the surgical 
+resection area of epilepsy patients, and the accur acy, 
+sensitivity and F1 Score of the predicted results were 
+calculated. 
+The statistical metrics used to evaluate classification 
+performance in this approach include Precision, Sensitivity, 
+and F1 score, which are formally defined as follows: 
+ 𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛 =
+𝑇𝑃
+𝑇𝑃+𝐹𝑃  × 100% () 
+ 𝑆𝑒𝑛𝑠𝑖𝑡𝑖𝑣𝑖𝑡𝑦 =
+𝑇𝑃
+𝑇𝑃+𝐹𝑁  × 100% () 
+ 𝐹1 𝑆𝑐𝑜𝑟𝑒 =
+2×(𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛×𝑆𝑒𝑛𝑠𝑖𝑡𝑖𝑣𝑖𝑡𝑦)
+𝑃𝑟𝑒𝑐𝑖𝑠𝑖𝑜𝑛+𝑆𝑒𝑛𝑠𝑖𝑡𝑖𝑣𝑖𝑡𝑦  () 
+among them, TP (True Positive) represents the channel that is 
+correctly predicted to be an epileptic source  channel and is 
+consistent with the actual surgical resection or clinical 
+labeling.; TN (True Negative) represents the channels 
+correctly identified as non -epileptic sources; FP (False 
+Positive) represents non -epileptic source channels that are 
+wrongly pred icted to be epileptic sources and FN (False 
+Negative) indicates an epileptic source channel that has not 
+been correctly identified. 
+The results of the experiments are shown in Table I, where 
+bold fonts mark the indicators for which patients perform 
+optimally among the three features. From the overall results, 
+outflow was better than inflow and net flow in all predictors 
+(precision=0.889, sensitivity=1.0, F1=0.941), showing higher 
+stability and reliability. Therefore, outflow can be considered 
+a superior indicator for seizure onset zone localization, more 
+effectively reflecting the core role of epileptogenic regions 
+within the brain network. 
+TABLE I.  RESULTS OF EPILEPTOGENIC ZONE LOCALIZATION WITH 
+THREE METRICS 
+Metrics Precision Sensitivity F1 Score 
+Outflow 88.9% 100% 0.941 
+Inflow 77.8% 87.5% 0.824 
+Metrics Precision Sensitivity F1 Score 
+Netflow 33.3% 37.5% 0.353 
+To further validate the effectiveness of introducing 
+sparsity regularization in constructing the brain effective 
+connectivity network, an ablation experiment was conducted. 
+Specifically, a model without sparsity constraint was used as 
+the control group and compared with the sparsity-constrained 
+model (see results in Table 1). Both experiments used the 
+same dataset and processing pipeline, and the performance 
+was evaluated using Precision, Sensitivity, and F1 Score as 
+metrics. The experimental results are presented in Table 2. 
+TABLE II.  RESULTS OF EPILEPTOGENIC ZONE LOCALIZATION WITH 
+THE MODEL WITHOUT SPARSITY CONSTRAINT 
+Metrics Precision Sensitivity F1 Score 
+Outflow 77.8% 87.5% 0.824 
+Inflow 55.6% 62.5% 0.588 
+Netflow 33.3% 37.5% 0.353 
+ 
+Table 2 presents the localization results of the model 
+without sparsity constraint across the three features. As shown, 
+the performance of this model is consistently inferior to that 
+of the sparsity -constrained model in all evaluation metrics. 
+Specifically, under the outflow feature, the F1 Score decreases 
+from 0.941 to 0.824, and the inflow feature also exhibits 
+varying degrees of decline. These results indicate that 
+introducing sparsity regularization in the construction of the 
+effective connectivity network effectivel y suppresses 
+redundant connections and highlights core lesion -related 
+channels, thereby improving localization accuracy and 
+stability. 
+IV. CONCLUSIONS AND FUTURE WORK 
+The study proposes a nonlinear Granger causality learning 
+method to construct an effective connectivity network via 
+component-wise MLP for iEEG -based EZ  localization, 
+aiming to provide help for preoperative localization of the EZ 
+among patients with drug -resistant epilepsy. On the HUP 
+iEEG dataset, the accuracy of the approach was 88.9%, the 
+sensitivity was 100%  and the F1 score was 0.941. By  
+integrating machine learning with neural data analytics , this 
+approach can accurately identify the EZ before surgery. The 
+experimental results demonstrate that this approach has good 
+performance in the localization of EZ. In view of the large 
+differences in etiology and seizure types among different 
+patients, the criteria for determining EZ should be adapted to 
+individual data characteristics. In future work, we plan to 
+conduct experiments using a larger patient iEEG data set to 
+further verify the feasibility of the proposed approach in 
+different types of epilepsy , refine the implementation of 
+optimization techniques in engineering  and perform 
+systematic comparative analyses usi ng state -of-the-art 
+methods. 
+REFERENCES 
+[1] Z. Chen et al., “Ambient air pollution and epileptic seizures: A panel 
+study in australia,” Epilepsia, vol. 63, no. 7, pp. 1682–1692, Jul. 2022, 
+doi: 10.1111/epi.17253. 
+[2] R. S. Fisher et al., “ILAE official report: A practical clinical definition 
+of epilepsy,” Epilepsia, vol. 55, no. 4, pp. 475 –482, Apr. 2014, doi: 
+10.1111/epi.12550. 
+[3] B. E. Youngerman, F. A. Khan, and G. M. McKhann, 
+“Stereoelectroencephalography in epilepsy, cognitive neurophysiology, 
+Authorized licensed use limited to: Xiamen University. Downloaded on April 30,2026 at 02:09:53 UTC from IEEE Xplore.  Restrictions apply. 
+===== PAGE 6 =====
+ 
+ 
+and psychiatric disease: Safety, efficacy, and place in therapy,” NDT, 
+vol. Volume 15, pp. 1701 –1716, Jun. 2019, doi: 
+10.2147/NDT.S177804. 
+[4] M. Mü ller, M. Caporro, H. Gast, C. Pollo, R. Wiest, K. Schindler, and 
+C. Rummel, “Linear and nonlinear interrelations show fundamentally 
+distinct network structure in preictal intracranial EEG of epilepsy 
+patients,” Human Brain Mapping, vol. 41, no. 2, pp. 467 –483, Feb. 
+2020, doi: 10.1002/hbm.24816. 
+[5] Z. Cai, X. Jiang, A. Bagić, G. A. Worrell, M. Richardson, and B. He, 
+“Spontaneous HFO sequences reveal propagation pathways for precise 
+delineation of epileptogenic networks,” May 05, 2024, Neuroscience. 
+doi: 10.1101/2024.05.02.592202. 
+[6] A. Roebroeck, A. K. Seth, and P. Valdes -Sosa, “Causal time series 
+analysis of functional magnetic resonance imaging data”. 
+[7] G. Deshpande, Z. Li, P. Santhanam, C. D. Coles, M. E. Lynch, S. 
+Hamann, and X. Hu , “Recursive cluster elimination based support 
+vector machine for disease state prediction using resting state 
+functional and effective brain connectivity,” PLoS ONE, vol. 5, no. 12, 
+p. e14277, Dec. 2010, doi: 10.1371/journal.pone.0014277. 
+[8] A. A. Sokolov et al., “Asymmetric high -order anatomical brain 
+connectivity sculpts effective connectivity,” Network Neuroscience, 
+vol. 4, no. 3, pp. 871–890, Jan. 2020, doi: 10.1162/netn_a_00150. 
+[9] X. Hu et al., “Differentiating temporal plus ‘insula’ epilepsy from 
+temporal lobe epilepsy by brain networks based on noninvasive 
+examinations,” CNS Neurosci Ther, vol. 31, no. 7, p. e70517, Jul. 2025, 
+doi: 10.1111/cns.70517. 
+[10] L. Kong, W. Li, H. Yang, Y. Zhang, J. Guan, and S. Zhou, 
+“CausalFormer: An interpretable transformer for temporal causal 
+discovery,” IEEE Transactions on Knowledge and Data Engineering, 
+vol. 37, no. 1, pp. 102 –115, Jan. 2025, doi: 
+10.1109/TKDE.2024.3484461. 
+[11] Z. Luo et al., “Mapping effective connectivity by virtually perturbing a 
+surrogate brain,” Nat Methods, Apr. 2025, doi: 10.1038/s41592 -025-
+02654-x. 
+[12] A. Tank, I. Covert, N. Foti, A. Shojaie, and E. Fox, “Neural granger 
+causality,” IEEE Trans. Pattern Anal. Mach. Intell., pp. 1–1, 2021, doi: 
+10.1109/TPAMI.2021.3065601. 
+[13] M. Yuan and Y. Lin, “Model selection and estimation in regression 
+with grouped variables,” Journal of the Royal Statistical Society Series 
+B: Statistical Methodology, vol. 68, no. 1, pp. 49 –67, Feb. 2006, doi: 
+10.1111/j.1467-9868.2005.00532.x. 
+[14] J. M. Bernabei et al., “Normative intracranial EEG maps epileptogenic 
+tissues in focal epilepsy,” Brain, vol. 145, no. 6, pp. 1949 –1961, Jun. 
+2022, doi: 10.1093/brain/awab480. 
+ 
+ 
+Authorized licensed use limited to: Xiamen University. Downloaded on April 30,2026 at 02:09:53 UTC from IEEE Xplore.  Restrictions apply. 

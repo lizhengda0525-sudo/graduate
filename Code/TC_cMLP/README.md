@@ -1,5 +1,7 @@
 # TC-cMLP
 
+当前项目状态和下一步工作见[项目交接记录](./项目交接_2026-09-20.md)。HUP116 第一段 seizure 的完整实验已保存在 `results/hup/HUP116_run1_new/`。
+
 本工程中的名称固定为：`cMLP` 表示 Neural-GC 原始方法；`TC-cMLP` 表示在原始 cMLP 上加入跨窗口参数共享和时间约束的方法。S-cMLP 不包含在本工程中。
 
 此前的 TC_cMLP 工程及其结果保存在 `../备份/TC_cMLP_旧版_20260919/`；较早的 Neural-GC 代码副本保存在 `../备份/Neural-GC-master_旧版_20260919/`。本工程只读取 `../Neural-GC-original/` 中的原始代码。
@@ -39,11 +41,11 @@ py -m pytest
 HUP116 的预处理窗口已经保存在 `results/hup/preprocessed/HUP116_run1_windows.npz`。直接运行训练：
 
 ```powershell
-py run.py --task hup --config configs/hup116.yaml --output-dir results/hup/HUP116_run1_new
+py run.py --task hup --config configs/hup116.yaml --output-dir results/hup/HUP116_run1_future
 ```
 
 终端会显示当前方法、窗口或迭代进度、目标函数、已用时间，以及每种方法的 SOZ Precision、Sensitivity、F1 和训练秒数。原始 cMLP 每完成 10 个窗口显示一次；训练过程中每 30 秒显示一次当前状态。可以用 `--progress-every` 和 `--heartbeat-seconds` 调整这两个间隔。指定新的 `--output-dir` 可保留已有结果；结果目录必须位于工程的 `results/` 下。原始信号区间保存在 `results/hup/cache/HUP116_run1_segment.npz`。信号提取及预处理命令见[运行脚本说明](./运行脚本/说明.md)。提取信号需要 `pyedflib`，可安装 `.[preprocess]`。
 
 每次实验在指定的 `results/` 子目录保存配置、原始仓库 commit、训练记录、模型参数、因果强度矩阵、二值因果矩阵和评价指标。`training_times.json` 分别记录每种方法的训练秒数和起止时间；训练秒数不包含结果保存与评价计算。目录已存在时程序会停止，防止覆盖原有结果。
 
-Synthetic 功能检查使用 `configs/synthetic_smoke.yaml`；完整的 seed 42 结果保存在 `results/synthetic/seed_42/`；训练耗时比较使用 `configs/synthetic_timing_seed_42.yaml`，结果保存在 `results/synthetic/seed_42_timing/`。HUP116 的完整实验仍待运行。
+Synthetic 功能检查使用 `configs/synthetic_smoke.yaml`；完整的 seed 42 结果保存在 `results/synthetic/seed_42/`；训练耗时比较使用 `configs/synthetic_timing_seed_42.yaml`，结果保存在 `results/synthetic/seed_42_timing/`。HUP116 的三种方法已运行完成，指标和限制见[项目交接记录](./项目交接_2026-09-20.md)。
