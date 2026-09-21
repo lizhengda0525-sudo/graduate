@@ -1,8 +1,8 @@
-# TC-cMLP 方法说明
+# TC-cMLP
 
 ## 1. 研究问题
 
-本研究处理多通道 intracranial electroencephalography（iEEG）信号。设一段记录包含 $p$ 个 channel，在时间 $t$ 的观测表示为
+处理多通道 intracranial electroencephalography（iEEG）信号。设一段记录包含 $p$ 个 channel，在时间 $t$ 的观测表示为
 
 $$
 x_t=[x_t^1,x_t^2,\ldots,x_t^p]\in\mathbb R^p.
@@ -262,21 +262,3 @@ C^{(1)},C^{(2)},\ldots,C^{(W)},
 $$
 
 每个 channel 的动态 outflow、inflow 和 net flow 时间序列，以及患者内部的 SOZ score、channel 排名和最终预测结果。实验程序还需要保存窗口时间范围、seizure onset 相对时间、模型配置、随机种子、训练记录和评价指标，以支持重复运行和结果核查。
-
-## 13. 方法验证关系
-
-Synthetic data 提供已知动态因果结构，用于验证 edge detection、causal strength recovery 和 change-point recovery。该部分直接检验 TC-cMLP 能否恢复预先设定的动态网络，并考察短窗口、不同信噪比和不同变化方式下的稳定程度。
-
-HUP iEEG 提供临床 SOZ channel、resection or ablation channel 和手术结局信息。该部分利用患者级 precision、sensitivity、F1、AUROC 和 AUPRC 检验 channel 排名及定位能力，并通过 patient-level bootstrap 计算 confidence interval。
-
-基线方法包括 sliding-window sparse VAR、原始 cMLP 逐窗口训练、fully shared cMLP，以及保留时变第一层但去除 temporal regularization 的模型。消融研究分别去除 group sparsity、temporal regularization 和后续层共享，用于确定各组成部分对动态网络恢复和 SOZ 定位的作用。
-
-## 14. 研究边界
-
-TC-cMLP 学到的是预测意义上的 Granger causal influence，无法单独证明神经生理机制中的直接因果作用。Causal score 来源于神经网络第一层权重范数，表示患者内部和时间窗口之间的相对强度，不具有独立的物理单位。
-
-时间约束表达相邻窗口多数连接连续变化的研究假设。如果真实网络在很短时间内出现大规模变化，过大的 \(\lambda_t\) 可能削弱变化幅度。因此，\(\lambda_t\) 必须通过 validation data 确定，并在 sensitivity analysis 中报告其对 edge recovery、change-point recovery 和 SOZ localization 的影响。
-
-## 15. 参考基础
-
-原始 cMLP 代码保存在 `Code/Neural-GC-original/`。第一篇会议论文的方法称为 S-cMLP，其 iEEG 应用参考 `Paper/A_Nonlinear_Granger_Causality_Learning_Approach_via_Sparse_Component-Wise_MLP_for_iEEG-Based_Epileptogenic_Zone_Localization.pdf`。当前方法称为 TC-cMLP，工程代码保存在 `Code/TC_cMLP/`，使用原始 cMLP 预测网络并加入窗口专属第一层、共享后续层和时间约束。
